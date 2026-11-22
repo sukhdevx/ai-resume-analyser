@@ -1,0 +1,605 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Resume Analyzer</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #080d20;
+    color: white;
+    min-height: 100vh;
+}
+
+nav {
+    padding: 25px 8%;
+    border-bottom: 1px solid #202b48;
+    font-size: 23px;
+    font-weight: bold;
+    color: #a78bfa;
+}
+
+.container {
+    max-width: 850px;
+    margin: 90px auto;
+    padding: 20px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 46px;
+    margin-bottom: 20px;
+}
+
+h1 span {
+    color: #8b5cf6;
+}
+
+.subtitle {
+    color: #aab4cc;
+    font-size: 17px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+}
+
+.upload-box {
+    border: 2px dashed #6550bb;
+    border-radius: 18px;
+    padding: 55px 20px;
+    background: #111a35;
+    margin-bottom: 25px;
+}
+
+.upload-box h2 {
+    margin-bottom: 15px;
+}
+
+.upload-box p {
+    color: #aab4cc;
+    margin-bottom: 20px;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.upload-label {
+    display: inline-block;
+    background: #7048e8;
+    padding: 13px 25px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#fileName {
+    margin-top: 18px;
+    color: #a78bfa;
+}
+
+.analyze-btn {
+    background: linear-gradient(90deg, #7048e8, #2585ed);
+    border: none;
+    color: white;
+    padding: 16px 45px;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.features {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+    margin-top: 65px;
+    color: #aab4cc;
+}
+
+footer {
+    text-align: center;
+    color: #69758f;
+    padding: 30px;
+}
+
+/* RESULT DASHBOARD */
+
+.result-dashboard {
+    display: none;
+    max-width: 950px;
+    margin: 55px auto;
+    padding: 35px;
+    background: linear-gradient(145deg, #111a35, #15132e);
+    border: 1px solid #51418d;
+    border-radius: 22px;
+    text-align: left;
+    box-shadow: 0 15px 50px rgba(100, 60, 220, 0.15);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.eyebrow {
+    color: #a78bfa;
+    font-size: 12px;
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+
+.result-header h2 {
+    font-size: 30px;
+    margin: 10px 0;
+}
+
+.result-header p {
+    color: #aab4cc;
+}
+
+.ai-badge {
+    background: #30245a;
+    color: #c4b5fd;
+    padding: 11px 17px;
+    border-radius: 30px;
+    font-size: 13px;
+}
+
+.score-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 30px;
+    border-radius: 18px;
+    background: linear-gradient(110deg, #30206b, #123b78);
+    margin-bottom: 40px;
+}
+
+.score-card h1 {
+    font-size: 55px;
+    margin: 12px 0;
+    color: white;
+}
+
+.score-card h1 small {
+    font-size: 20px;
+    color: #c4b5fd;
+}
+
+.score-card p {
+    color: #cbd5e1;
+}
+
+.score-circle {
+    width: 105px;
+    height: 105px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: conic-gradient(
+        #a78bfa 0deg,
+        #38bdf8 0deg,
+        #ffffff25 0deg
+    );
+    position: relative;
+}
+
+.score-circle::before {
+    content: "";
+    position: absolute;
+    width: 82px;
+    height: 82px;
+    border-radius: 50%;
+    background: #20204b;
+}
+
+.score-circle span {
+    position: relative;
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.insights-heading {
+    margin-bottom: 25px;
+}
+
+.insights-heading h2 {
+    font-size: 23px;
+    margin-bottom: 8px;
+}
+
+.insights-heading p {
+    color: #aab4cc;
+}
+
+.analysis-content {
+    color: #e2e8f0;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.analysis-content h1,
+.analysis-content h2,
+.analysis-content h3 {
+    color: #c4b5fd;
+    margin: 25px 0 12px;
+}
+
+.analysis-content strong {
+    color: #a78bfa;
+}
+
+.analysis-content li {
+    margin: 8px 0 8px 22px;
+}
+
+.analysis-content ul,
+.analysis-content ol {
+    margin: 12px 0;
+}
+
+.analysis-content p {
+    margin: 12px 0;
+}
+
+.analysis-content hr {
+    border: 0;
+    border-top: 1px solid #39456b;
+    margin: 25px 0;
+}
+
+.analysis-content blockquote {
+    border-left: 3px solid #8b5cf6;
+    padding-left: 15px;
+    color: #cbd5e1;
+}
+
+.report-footer {
+    border-top: 1px solid #39456b;
+    margin-top: 35px;
+    padding-top: 20px;
+    color: #a78bfa;
+    font-size: 13px;
+}
+
+@media(max-width:600px) {
+    .result-dashboard {
+        padding: 20px;
+        margin: 30px 12px;
+    }
+
+    .score-card {
+        padding: 20px;
+    }
+
+    .score-card h1 {
+        font-size: 40px;
+    }
+
+    .score-circle {
+        width: 85px;
+        height: 85px;
+    }
+
+    .score-circle::before {
+        width: 66px;
+        height: 66px;
+    }
+}
+
+.report-actions {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.download-btn {
+    background: linear-gradient(90deg, #7048e8, #2585ed);
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.download-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px #7048e855;
+}
+
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    nav, footer, .container,
+    .report-actions, .report-footer {
+        display: none !important;
+    }
+
+    .result-dashboard {
+        display: block !important;
+        background: white !important;
+        color: black !important;
+        border: none !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+    }
+
+    .score-card {
+        background: #eeeeff !important;
+        color: black !important;
+    }
+
+    .score-card h1,
+    .analysis-content,
+    .analysis-content p {
+        color: black !important;
+    }
+
+    .analysis-content h1,
+    .analysis-content h2,
+    .analysis-content h3 {
+        color: #49318c !important;
+    }
+}
+
+
+</style>
+</head>
+
+<body>
+
+<nav>✦ AI Resume Analyzer</nav>
+
+<div class="container">
+
+    <h1>Build Your Career With <span>AI</span></h1>
+
+    <p class="subtitle">
+        Upload your resume and get ready to discover
+        insights that can help improve your career opportunities.
+    </p>
+
+    <div class="upload-box">
+
+        <h2>Upload Your Resume</h2>
+
+        <p>Choose your PDF or DOCX resume</p>
+
+        <label for="resume" class="upload-label">
+            Choose Resume
+        </label>
+
+        <input type="file" id="resume"
+        accept=".pdf,.docx">
+
+        <div id="fileName">No file selected</div>
+
+    </div>
+
+    <button class="analyze-btn" onclick="analyzeResume()">
+        Analyze Resume →
+    </button>
+    
+<div id="result" class="result-dashboard">
+
+    <div class="result-header">
+        <div>
+            <span class="eyebrow">✦ AI POWERED INSIGHTS</span>
+            <h2>Your Career Report</h2>
+            <p id="status">Analysis completed successfully!</p>
+        </div>
+        <div class="ai-badge">✦ AI Analysis</div>
+    </div>
+
+    <div class="score-card">
+        <div>
+            <span class="eyebrow">YOUR RESUME SCORE</span>
+            <h1 id="scoreValue">--<small>/100</small></h1>
+            <p>Overall resume performance</p>
+        </div>
+
+        <div class="score-circle" id="scoreCircle">
+            <span id="scorePercent">--%</span>
+        </div>
+    </div>
+
+    <div class="insights-heading">
+        <h2>Detailed Insights</h2>
+        <p>Personalized feedback powered by AI</p>
+    </div>
+
+    <div id="analysis" class="analysis-content"></div>
+
+    
+<div class="report-actions">
+    <button onclick="downloadReport()" class="download-btn">
+        ↓ Download PDF Report
+    </button>
+</div>
+
+<div class="report-footer">
+    <span>✦ Generated by AI Resume Analyzer</span>
+</div>
+
+
+</div>
+
+">
+    <h2 style="color:#a78bfa; margin-bottom:20px;">
+        AI Resume Analysis
+    </h2>
+
+    <p id="status" style="color:#aab4cc;"></p>
+
+    <pre id="analysis" style="
+        white-space:pre-wrap;
+        line-height:1.7;
+        font-family:Arial;
+        color:white;
+    "></pre>
+</div>
+
+    <div class="features">
+        <span>✓ PDF Support</span>
+        <span>✓ DOCX Support</span>
+        <span>✓ AI Powered</span>
+    </div>
+
+</div>
+
+<footer>
+    © 2026 AI Resume Analyzer | Built with FastAPI
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+
+<script>
+    function downloadReport() {
+    window.print();
+}
+    
+const resume = document.getElementById("resume");
+
+resume.addEventListener("change", function() {
+    const file = this.files[0];
+
+    document.getElementById("fileName").textContent =
+        file ? file.name : "No file selected";
+});
+
+async function analyzeResume() {
+
+    if (!resume.files.length) {
+        alert("Please upload your resume first!");
+        return;
+    }
+
+    const file = resume.files[0];
+
+    const resultBox = document.getElementById("result");
+    const status = document.getElementById("status");
+    const analysis = document.getElementById("analysis");
+
+    resultBox.style.display = "block";
+
+    status.textContent = "Uploading your resume...";
+    analysis.textContent = "";
+
+    try {
+
+        // STEP 1: Upload resume to FastAPI
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const uploadResponse = await fetch(
+            "http://127.0.0.1:8000/upload-resume",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        if (!uploadResponse.ok) {
+            throw new Error("Resume upload failed");
+        }
+
+        const uploadData = await uploadResponse.json();
+
+        const resumeText = uploadData.extracted_text;
+
+        if (!resumeText) {
+            throw new Error("Could not extract resume text");
+        }
+
+        // STEP 2: Send extracted text to AI
+
+        status.textContent = "Ollama is analyzing your resume...";
+
+        const params = new URLSearchParams();
+        params.append("resume_text", resumeText);
+
+        const aiResponse = await fetch(
+            "http://127.0.0.1:8000/analyze-resume?" + params.toString(),
+            {
+                method: "POST"
+            }
+        );
+
+        if (!aiResponse.ok) {
+            throw new Error("AI analysis failed");
+        }
+
+        const aiData = await aiResponse.json();
+
+        // STEP 3: Display AI result
+
+        status.textContent = "Analysis completed successfully!";
+
+const aiText = aiData.analysis;
+
+// Extract score from AI response
+const match = aiText.match(
+    /(\d{1,3})\s*(?:\/\s*100|out of 100)/i
+);
+
+const score = match
+    ? Math.min(100, Math.max(0, Number(match[1])))
+    : null;
+
+// Update score
+document.getElementById("scoreValue").innerHTML =
+    score !== null ? `${score}<small>/100</small>` : `N/A`;
+
+document.getElementById("scorePercent").textContent =
+    score !== null ? `${score}%` : "N/A";
+
+// Update circular score indicator
+const circle = document.getElementById("scoreCircle");
+
+circle.style.background = score !== null
+    ? `conic-gradient(#a78bfa ${score * 3.6}deg, #ffffff25 0deg)`
+    : "#39456b";
+
+// Render formatted Markdown safely
+analysis.innerHTML = DOMPurify.sanitize(
+    marked.parse(aiText)
+);
+    }
+
+    catch (error) {
+
+        status.textContent = "Something went wrong.";
+
+        analysis.textContent = error.message;
+
+        console.error(error);
+
+    }
+
+}
+</script>
+
+</body>
+</html>
