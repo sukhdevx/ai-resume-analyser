@@ -361,7 +361,53 @@ footer {
         color: #49318c !important;
     }
 }
+.analysis-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 25px;
+}
 
+.insight-card {
+    background: #182344;
+    border: 1px solid #35466e;
+    border-radius: 16px;
+    padding: 22px;
+    color: #ffffff;
+    text-align: left;
+}
+
+.insight-card h3 {
+    color: #a78bfa;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 19px;
+}
+
+.insight-card p {
+    line-height: 1.7;
+    color: #d5dbea;
+}
+
+.insight-card li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.improvement-card {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #25245a, #173c62);
+}
+
+@media (max-width: 650px) {
+    .analysis-content {
+        grid-template-columns: 1fr;
+    }
+
+    .improvement-card {
+        grid-column: auto;
+    }
+}
 
 </style>
 </head>
@@ -428,8 +474,27 @@ footer {
         <p>Personalized feedback powered by AI</p>
     </div>
 
-    <div id="analysis" class="analysis-content"></div>
+    <div id="analysis" class="analysis-content">
+    <div class="insight-card">
+        <h3>💪 Strengths</h3>
+        <div id="strengths"></div>
+    </div>
 
+    <div class="insight-card">
+        <h3>⚠️ Weaknesses</h3>
+        <div id="weaknesses"></div>
+    </div>
+
+    <div class="insight-card">
+        <h3>📚 Missing Skills</h3>
+        <div id="missingSkills"></div>
+    </div>
+
+    <div class="insight-card improvement-card">
+        <h3>🚀 What You Should Improve</h3>
+        <div id="suggestions"></div>
+    </div>
+</div>
     
 <div class="report-actions">
     <button onclick="downloadReport()" class="download-btn">
@@ -505,7 +570,10 @@ async function analyzeResume() {
 
     resultBox.style.display = "block";
     status.textContent = "Uploading resume...";
-    analysis.textContent = "";
+   document.getElementById("strengths").innerHTML = "";
+   document.getElementById("weaknesses").innerHTML = "";
+   document.getElementById("missingSkills").innerHTML = "";
+   document.getElementById("suggestions").innerHTML = "";
 
     try {
         const formData = new FormData();
@@ -543,7 +611,134 @@ const scoreMatch = aiData.analysis.match(/(?:score|rating)[^\d]*(\d{1,3})\s*\/\s
 
 document.getElementById("scoreValue").innerHTML =
     (scoreMatch ? scoreMatch[1] : "--") + "<small>/100</small>";
-analysis.textContent = aiData.analysis;
+const resultText = aiData.analysis;
+
+function getSection(title, nextTitle) {
+    const start = resultText.indexOf("## " + title);
+    if (start === -1) return "No information available.";
+
+    const contentStart = start + title.length + 3;
+    let end = nextTitle
+        ? resultText.indexOf("## " + nextTitle, contentStart)
+        : resultText.length;
+
+    if (end === -1) end = resultText.length;
+
+    return resultText.substring(contentStart, end).trim();
+}
+
+
+
+function getSection(title, nextTitle) {
+    const start = resultText.indexOf("## " + title);
+    if (start === -1) return "No information available.";
+
+    const contentStart = start + title.length + 3;
+    let end = nextTitle
+        ? resultText.indexOf("## " + nextTitle, contentStart)
+        : resultText.length;
+
+    if (end === -1) end = resultText.length;
+
+    return resultText.substring(contentStart, end).trim();
+}
+
+
+function getSection(title, nextTitle) {
+    const start = resultText.indexOf("## " + title);
+    if (start === -1) return "No information available.";
+
+    const contentStart = start + title.length + 3;
+    let end = nextTitle
+        ? resultText.indexOf("## " + nextTitle, contentStart)
+        : resultText.length;
+
+    if (end === -1) end = resultText.length;
+
+    return resultText.substring(contentStart, end).trim();
+}
+
+function getSection(title, nextTitle) {
+    const start = resultText.indexOf("## " + title);
+    if (start === -1) return "No information available.";
+
+    const contentStart = start + title.length + 3;
+    let end = nextTitle
+        ? resultText.indexOf("## " + nextTitle, contentStart)
+        : resultText.length;
+
+    if (end === -1) end = resultText.length;
+
+    return resultText.substring(contentStart, end).trim();
+}
+
+
+function getSection(title, nextTitle) {
+    const start = resultText.indexOf("## " + title);
+    if (start === -1) return "No information available.";
+
+    const contentStart = start + title.length + 3;
+    let end = nextTitle
+        ? resultText.indexOf("## " + nextTitle, contentStart)
+        : resultText.length;
+
+    if (end === -1) end = resultText.length;
+
+    return resultText.substring(contentStart, end).trim();
+}
+const raw = aiData.analysis || "";
+
+const sections = {
+    strengths: [],
+    weaknesses: [],
+    missingSkills: [],
+    suggestions: []
+};
+
+let currentSection = null;
+
+raw.split(/\r?\n/).forEach(line => {
+    const heading = line.trim()
+        .replace(/^#{1,6}\s*/, "")
+        .replace(/^\*\*(.*?)\*\*:?$/, "$1")
+        .replace(/:$/, "")
+        .trim()
+        .toLowerCase();
+
+    if (heading.startsWith("strengths")) {
+        currentSection = "strengths";
+    } else if (heading.startsWith("weaknesses")) {
+        currentSection = "weaknesses";
+    } else if (heading.startsWith("missing skills")) {
+        currentSection = "missingSkills";
+    } else if (
+        heading.startsWith("improvement suggestions") ||
+        heading.startsWith("what you should improve")
+    ) {
+        currentSection = "suggestions";
+    } else if (currentSection) {
+        sections[currentSection].push(line);
+    }
+});
+
+const elementIds = {
+    strengths: "strengths",
+    weaknesses: "weaknesses",
+    missingSkills: "missingSkills",
+    suggestions: "suggestions"
+};
+
+Object.entries(elementIds).forEach(([key, id]) => {
+    const element = document.getElementById(id);
+    const content = sections[key].join("\n").trim();
+
+    if (element) {
+        element.innerHTML = content
+            ? marked.parse(content)
+            : "<p>Feedback not provided. Please analyze again.</p>";
+    }
+});
+
 
     } catch (error) {
         status.textContent = "Error: " + error.message;
