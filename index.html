@@ -538,7 +538,12 @@ async function analyzeResume() {
         const aiData = await aiResponse.json();
 
         status.textContent = "Analysis complete!";
-        analysis.textContent = aiData.analysis;
+
+const scoreMatch = aiData.analysis.match(/(?:score|rating)[^\d]*(\d{1,3})\s*\/\s*100/i);
+
+document.getElementById("scoreValue").innerHTML =
+    (scoreMatch ? scoreMatch[1] : "--") + "<small>/100</small>";
+analysis.textContent = aiData.analysis;
 
     } catch (error) {
         status.textContent = "Error: " + error.message;
